@@ -4,8 +4,8 @@ import { RentalHouseModel } from "./rentalHouse.model";
 import AppError from "../../helpers/error";
 import { StatusCodes } from "http-status-codes";
 import { IImageFiles } from "../../middlewares/interface/IImageFile";
-import { Tenant } from "../tenant/tenant.model";
 import User from "../user/user.model";
+import { RentalRequestModel } from "../rentalRequest/rentalRequest.model";
 
 // Create a new rental house listing
 const createRentalHouseInDB = async (
@@ -69,60 +69,53 @@ const getLandlordRentalHouses = async (landlordId: string) => {
 };
 
 // Respond to a rental request (approve/reject)
-// const respondToRentalRequestDB = async (
-//   requestId: string,
-//   status: "Approved" | "Rejected",
-//   userId: string,
-//   phoneNumber?: string
-// ) => {
-//   const request = await Tenant.findById(requestId);
+const respondToRentalRequestDB = async (
+  requestId: string,
+  status: "Approved" | "Rejected",
+  userId: string,
+  phoneNumber?: string
+) => {
+  const rentalRequest = await RentalRequestModel.findById(requestId);
 
-//   if (!request) {
-//     throw new AppError(400, "Tenant Request Not found");
-//   }
+  if (!rentalRequest) {
+    throw new AppError(400, "Rental request not found");
+  }
 
-//   const product = await RentalHouseModel.findById(request.products);
-//   if (!product) {
-//     throw new AppError(400, "Product Not found");
-//   }
+  const rentalHouse = await RentalHouseModel.findById(
+    rentalRequest.rentalHouseId
+  );
+  if (!rentalHouse) {
+    throw new AppError(400, "Rental house not found");
+  }
 
-//   const landlord = await User.findById(product.LandlordID);
-//   if (!landlord) {
-//     throw new AppError(400, "User Not found");
-//   }
+  const landlord = await User.findById(rentalHouse.landlordId);
+  if (!landlord) {
+    throw new AppError(400, "Landlord not found");
+  }
 
-//   // console.log(product.LandlordID.toString(), userId);
+  // Authorization check: only the actual landlord can respond
+  if (String(rentalHouse.landlordId) !== String(userId)) {
+    throw new AppError(
+      403,
+      "You are not authorized to respond to this request"
+    );
+  }
 
-//   if (product.LandlordID.toString() !== userId) {
-//     // console.log("Inside here");
-//     throw new AppError(
-//       400,
-//       "You are not authorized to respond to this request"
-//     );
-//   }
+  const finalPhoneNumber = landlord.phone || phoneNumber;
+  if (status === "Approved" && !finalPhoneNumber) {
+    throw new AppError(400, "Phone number is required to approve this request");
+  }
 
-//   // If status is "Approved", check if the landlord's phone number is provided
-//   const landlordPhone = landlord.phone || phoneNumber;
-//   if (status === "Approved") {
-//     if (!landlord?.phone) {
-//       if (!landlordPhone) {
-//         throw new AppError(404, "Phone number is required");
-//       }
-//       request.phone = landlordPhone;
-//     } else {
-//       request.phone = landlordPhone;
-//     }
-//   } else if (status === "Rejected") {
-//     request.phone = landlordPhone;
-//   }
+  rentalRequest.status = status;
+  if (status === "Approved") {
+    rentalRequest.phone = finalPhoneNumber;
+  }
 
-//   request.status = status; // Update the status to Approved/Rejected
-//   await request.save(); // Save the changes
+  await rentalRequest.save();
 
-//   return request;
-// };
+  return rentalRequest;
+};
 
-// Exporting all services
 export const RentalHouseServices = {
   createRentalHouseInDB,
   getAllRentalHousesFromDB,
@@ -130,5 +123,5 @@ export const RentalHouseServices = {
   updateRentalHouseInDB,
   deleteRentalHouseFromDB,
   getLandlordRentalHouses,
-  // respondToRentalRequestDB,
+  respondToRentalRequestDB,
 };

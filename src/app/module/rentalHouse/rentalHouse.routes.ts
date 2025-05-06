@@ -3,10 +3,11 @@ import { RentalHouseControllers } from "./rentalHouse.controller";
 import { multerUpload } from "../../config/multer.config";
 import { parseBody } from "../../middlewares/bodyParser";
 import auth from "../../middlewares/auth";
+import { RentalRequestController } from "../rentalRequest/rentalRequest.controller";
 
 const router = express.Router();
 
-// ✅ Create a new rental house listing -> Works 
+// ✅ Create a new rental house listing -> Works
 router.post(
   "/landlords/listings",
   auth("landlord"),
@@ -15,7 +16,7 @@ router.post(
   RentalHouseControllers.createRentalHouse
 );
 
-// ✅ Get all rental house listings -> Works 
+// ✅ Get all rental house listings -> Works
 router.get("/landlords/listings", RentalHouseControllers.getAllRentalHouses);
 
 // ✅ Get a single rental house listing by ID
@@ -24,7 +25,7 @@ router.get(
   RentalHouseControllers.getSingleRentalHouse
 );
 
-// ✅ Update a rental house listing by ID -> Works 
+// ✅ Update a rental house listing by ID -> Works
 router.patch(
   "/landlords/listings/:id",
   auth("landlord"),
@@ -33,7 +34,7 @@ router.patch(
   RentalHouseControllers.updateRentalHouse
 );
 
-// ✅ Get all listings by a specific landlord (authenticated) 
+// ✅ Get all listings by a specific landlord (authenticated)
 router.get(
   "/landlords/my-postings",
   auth("landlord"),
@@ -41,11 +42,11 @@ router.get(
 );
 
 // ✅ Respond to tenant rental request (approve/reject)
-// router.put(
-//   "/landlords/requests/:requestId",
-//   auth("landlord"),
-//   RentalHouseControllers.respondToRentalRequest
-// );
+router.put(
+  "/landlords/requests/:requestId",
+  auth("landlord"),
+  RentalHouseControllers.respondToRentalRequest
+);
 
 // ✅ Delete a rental house listing by ID
 router.delete("/:rentalHouseId", RentalHouseControllers.deleteRentalHouse);

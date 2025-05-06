@@ -1,12 +1,9 @@
 import express, { Request, Response } from "express";
 import userRouter from "./app/module/user/user.router";
 import authRouter from "./app/module/auth/auth.router";
-
 import { OrderRoutes } from "./app/module/order/order.routes";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-
-import { TenantRouter } from "./app/module/tenant/tenant.routes";
 import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
 import notFound from "./app/middlewares/notFound";
 import adminRouter from "./app/module/admin/admin.router";
@@ -38,9 +35,6 @@ app.use("/", RentalHouseRoutes);
 app.use("/admin", adminRouter);
 
 app.use("/user", userRouter);
-
-//For tenant
-// app.use("/tenants", TenantRouter);
 app.use("/rental-requests", RentalRequestRoutes);
 
 app.use("/order", OrderRoutes);

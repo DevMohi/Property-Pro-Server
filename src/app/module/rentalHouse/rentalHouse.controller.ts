@@ -117,27 +117,27 @@ const getLandlordRentalHouses = catchAsync(
 );
 
 // Respond to a rental request (approve/reject)
-// const respondToRentalRequest = catchAsync(
-//   async (req: Request, res: Response) => {
-//     const { requestId } = req.params;
-//     const { status, phoneNumber } = req.body;
-//     const userId = req?.user?.id;
+const respondToRentalRequest = catchAsync(
+  async (req: Request, res: Response) => {
+    const { requestId } = req.params;
+    const { status, phoneNumber } = req.body;
+    const userId = req?.user?.id;
 
-//     const result = await RentalHouseServices.respondToRentalRequestDB(
-//       requestId,
-//       status,
-//       userId,
-//       phoneNumber
-//     );
+    const result = await RentalHouseServices.respondToRentalRequestDB(
+      requestId,
+      status,
+      userId,
+      phoneNumber
+    );
 
-//     sendResponse(res, {
-//       statusCode: StatusCodes.OK,
-//       success: true,
-//       message: "Rental request responded to successfully",
-//       data: result,
-//     });
-//   }
-// );
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: "Rental request responded to successfully",
+      data: result,
+    });
+  }
+);
 
 // Export controller
 export const RentalHouseControllers = {
@@ -147,5 +147,5 @@ export const RentalHouseControllers = {
   updateRentalHouse,
   deleteRentalHouse,
   getLandlordRentalHouses,
-  // respondToRentalRequest,
+  respondToRentalRequest,
 };

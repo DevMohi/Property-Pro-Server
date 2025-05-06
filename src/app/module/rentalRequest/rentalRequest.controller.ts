@@ -44,8 +44,26 @@ const getAllRequests = catchAsync(async (_req: Request, res: Response) => {
   });
 });
 
+//Individual all requests
+const getRequestsForLandlord = catchAsync(async (req, res) => {
+  const landlordId = req.user?.id;
+
+  const result = await RentalRequestService.getAllRequestsForLandlord(
+    landlordId
+  );
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message:
+      "All tenant requests for your rental listings retrieved successfully",
+    data: result,
+  });
+});
+
 export const RentalRequestController = {
   createRequest,
   getMyRequests,
   getAllRequests,
+  getRequestsForLandlord,
 };

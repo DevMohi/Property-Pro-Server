@@ -45,8 +45,22 @@ const getAllRequests = async () => {
   );
 };
 
+const getAllRequestsForLandlord = async (landlordId: string) => {
+  const houses = await RentalHouseModel.find({ landlordId }).select("_id");
+  const houseIds = houses.map((house) => house._id);
+
+  const requests = await RentalRequestModel.find({
+    rentalHouseId: { $in: houseIds },
+  })
+    .populate("tenantId")
+    .populate("rentalHouseId");
+
+  return requests;
+};
+
 export const RentalRequestService = {
   createRentalRequest,
   getRequestsByTenant,
   getAllRequests,
+  getAllRequestsForLandlord
 };

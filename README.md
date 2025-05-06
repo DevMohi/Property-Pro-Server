@@ -4,7 +4,7 @@ Requirements : https://docs.google.com/document/d/1L6m2MxZx7m7ilTDyeCrLnv5QTuxPt
   Assignment  project - 6 
 </h1>
 
-# 📝 Basa Vara Management API
+# 📝 Property Pro Management API
 
 I developed a powerful backend for a blogging platform, enabling both user and admin operations with full CRUD functionality, authentication, and authorization. Users can create, read, update, and delete their blogs, while admins have extended privileges to manage all content.
 

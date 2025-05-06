@@ -18,4 +18,10 @@ router.get(
 // // Get all requests (admin only)
 router.get("/", auth("admin"), RentalRequestController.getAllRequests);
 
+router.get(
+  "/my-listing-requests",
+  auth("landlord"),
+  RentalRequestController.getRequestsForLandlord
+);
+
 export const RentalRequestRoutes = router;
