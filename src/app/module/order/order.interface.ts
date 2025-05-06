@@ -1,10 +1,10 @@
 import { Types } from "mongoose";
 
 export type TRentalTransaction = {
-  tenantRequest: Types.ObjectId; // from Tenant
-  tenant: Types.ObjectId;
-  product: Types.ObjectId; // from Product model
-  landlord: Types.ObjectId; // from User model (Landlord)
+  rentalRequestId: Types.ObjectId; // Previously: tenantRequest
+  tenantId: Types.ObjectId; // Previously: tenant
+  rentalHouseId: Types.ObjectId; // Previously: product
+  landlordId: Types.ObjectId; // Previously: landlord
   amount: number;
   status: "Pending" | "Paid" | "Cancelled";
   transaction: {

@@ -1,26 +1,42 @@
 import express from "express";
-import { RentalControllers } from "./order.controller";
 import auth from "../../middlewares/auth";
+import { RentalTransactionControllers } from "./order.controller";
+
 const router = express.Router();
 
+// Tenant initiates a rental payment
 router.post(
   "/rental-payment",
   auth("tenant"),
-  RentalControllers.makeRentalPayment
+  RentalTransactionControllers.makeRentalPayment
 );
 
 //verify payment
-router.get("/verify", auth("tenant"), RentalControllers.rentalVerify);
-
-//tenants can see their orders and payments through this route
-router.get("/my-order", auth("tenant"), RentalControllers.getTenantOrders);
-
-router.get("/all-orders", auth("admin"), RentalControllers.getAllRentalOrders);
-
-router.delete(
-  "/cancel-order/:id",
+router.get(
+  "/verify",
   auth("tenant"),
-  RentalControllers.cancelRentalOrder
+  RentalTransactionControllers.paymentVerify // ← should point to rentalVerify
+);
+
+// Tenant views their rental payment history
+router.get(
+  "/my-orders",
+  auth("tenant"),
+  RentalTransactionControllers.getTenantOrders
+);
+
+// Admin: view all transactions
+router.get(
+  "/all-orders",
+  auth("admin"),
+  RentalTransactionControllers.getAllRentalOrders
+);
+
+// Optional: cancel a rental order (not used in service yet)
+router.delete(
+  "/cancel-order/:transactionId",
+  auth("tenant"),
+  RentalTransactionControllers.cancelRentalOrder // or create a `cancelTransaction` method
 );
 
 export const OrderRoutes = router;

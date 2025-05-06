@@ -1,11 +1,3 @@
-// Shurjopay.config(
-//   process.env.sp_endpoint,
-//   process.env.sp_username,
-//   process.env.sp_password,
-//   process.env.sp_prefix,
-//   process.env.sp_return_url
-// );
-
 import Shurjopay, { VerificationResponse } from "shurjopay";
 
 export const shurjopay = new Shurjopay();
@@ -15,7 +7,7 @@ shurjopay.config(
   "sp_sandbox",
   "pyyk97hu&6u6",
   "INV",
-  "https://basa-vara-client.vercel.app/tenant/payments"
+  "https://2467-103-115-24-121.ngrok-free.app"
 );
 
 const makePaymentAsync = async (

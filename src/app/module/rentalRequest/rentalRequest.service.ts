@@ -2,8 +2,8 @@ import { RentalRequestModel } from "./rentalRequest.model";
 import { TRentalRequest } from "./rentalRequest.interface";
 
 import { StatusCodes } from "http-status-codes";
-import AppError from "../helpers/error";
-import { RentalHouseModel } from "../module/rentalHouse/rentalHouse.model";
+import AppError from "../../helpers/error";
+import { RentalHouseModel } from "../rentalHouse/rentalHouse.model";
 
 // Create a new rental request
 const createRentalRequest = async (data: TRentalRequest) => {

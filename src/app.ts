@@ -11,7 +11,7 @@ import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
 import notFound from "./app/middlewares/notFound";
 import adminRouter from "./app/module/admin/admin.router";
 import { RentalHouseRoutes } from "./app/module/rentalHouse/rentalHouse.routes";
-import { RentalRequestRoutes } from "./app/rentalRequest/rentalRequest.routes";
+import { RentalRequestRoutes } from "./app/module/rentalRequest/rentalRequest.routes";
 
 const app = express();
 //parsers
@@ -40,7 +40,7 @@ app.use("/admin", adminRouter);
 app.use("/user", userRouter);
 
 //For tenant
-// app.use("/tenants", TenantRouter); 
+// app.use("/tenants", TenantRouter);
 app.use("/rental-requests", RentalRequestRoutes);
 
 app.use("/order", OrderRoutes);

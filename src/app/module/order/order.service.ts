@@ -1,63 +1,43 @@
-// import { JwtPayload } from "jsonwebtoken";
-// import AppError from "../../helpers/error";
-// import { ProductModel } from "../rentalHouse/rentalHouse.model";
-// import { Tenant } from "../tenant/tenant.model";
-// import User from "../user/user.model";
-// import { TRentalTransaction } from "./order.interface";
-// import { RentalTransaction } from "./order.model";
-
+// order.service.ts (Rental Transaction)
 import { JwtPayload } from "jsonwebtoken";
-import { Tenant } from "../tenant/tenant.model";
+import { RentalRequestModel } from "../rentalRequest/rentalRequest.model";
 import AppError from "../../helpers/error";
-import { ProductModel } from "../rentalHouse/rentalHouse.model";
+import { RentalHouseModel } from "../rentalHouse/rentalHouse.model";
 import User from "../user/user.model";
-import { RentalTransaction } from "./order.model";
+
 import { OrderUtils } from "./order.utils";
+import { RentalTransactionModel } from "./order.model";
 
 const createRentalTransactionIntoDB = async (
-  tenantId: string,
+  rentalRequestId: string,
   userInfo: JwtPayload,
   client_ip: string
 ) => {
-  // console.log(client_ip); 
-  const tenantRequest = await Tenant.findById(tenantId).populate("products");
-  // console.log(tenantRequest);  
-  if (!tenantRequest) throw new AppError(404, "Rental request not found");
+  const rentalRequest = await RentalRequestModel.findById(rentalRequestId);
+  if (!rentalRequest) throw new AppError(404, "Rental request not found");
 
-  // console.log(tenantRequest);
+  const tenant = await User.findById(rentalRequest.tenantId);
+  if (!tenant) throw new AppError(400, "No tenant found");
 
-  const tenant = await User.findOne(tenantRequest?.tenant);
+  const rentalHouse = await RentalHouseModel.findById(
+    rentalRequest.rentalHouseId
+  );
+  if (!rentalHouse) throw new AppError(404, "Rental house not found");
 
-  if (!tenant) {
-    throw new AppError(400, "No tenant found");
-  }
-  const product = await ProductModel.findById(tenantRequest.products);
-
-  const existingTransaction = await RentalTransaction.findOne({
-    tenantRequest: tenantRequest._id,
-    tenant: tenant._id,
-    product: product?._id,
+  const existingTransaction = await RentalTransactionModel.findOne({
+    rentalRequestId: rentalRequest._id,
+    tenantId: tenant._id,
+    rentalHouseId: rentalHouse._id,
   });
 
-  // if (existingTransaction) {
-  //   if (existingTransaction.status === "Paid" ) {
-  //     throw new AppError(400, "This rental has already been paid for");
-  //   } else {
-  //     throw new AppError(
-  //       400,
-  //       "You already have a pending transaction for this request"
-  //     );
-  //   }
-  // }
-
   if (existingTransaction) {
-    if (existingTransaction?.status === "Paid") {
+    if (existingTransaction.status === "Paid") {
       throw new AppError(400, "This rental has already been paid for");
     } else if (
-      existingTransaction?.status === "Cancelled" ||
-      existingTransaction?.status === "Pending"
+      existingTransaction.status === "Cancelled" ||
+      existingTransaction.status === "Pending"
     ) {
-      await RentalTransaction.deleteOne({ _id: existingTransaction._id });
+      await RentalTransactionModel.deleteOne({ _id: existingTransaction._id });
     } else {
       throw new AppError(
         400,
@@ -66,27 +46,21 @@ const createRentalTransactionIntoDB = async (
     }
   }
 
-  if (product?.houseStatus === "rented") {
+  if (rentalHouse.houseStatus === "rented") {
     throw new AppError(400, "The listing is already rented");
   }
 
   const user = await User.findOne({ email: userInfo.email });
-  // console.log("user", userName?.name);
-
-  if (!product) throw new AppError(404, "Product not found");
-
-  const landlord = await User.findById(product.LandlordID);
+  const landlord = await User.findById(rentalHouse.landlordId);
   if (!landlord) throw new AppError(404, "Landlord not found");
 
-  // console.log("Inside user", userInfo);
+  const amount = Number(rentalHouse.rent);
 
-  const amount = Number(product.rent);
-
-  let order = await RentalTransaction.create({
-    tenantRequest: tenantRequest._id,
-    tenant: tenant._id,
-    product: product._id,
-    landlord: landlord._id,
+  let order = await RentalTransactionModel.create({
+    rentalRequestId: rentalRequest._id,
+    tenantId: tenant._id,
+    rentalHouseId: rentalHouse._id,
+    landlordId: landlord._id,
     amount,
   });
 
@@ -101,21 +75,9 @@ const createRentalTransactionIntoDB = async (
     customer_city: user?.city,
     client_ip,
   };
-  // console.log(transaction);
-  // console.log(paymentPayload);
 
   const payment = await OrderUtils.makePaymentAsync(paymentPayload);
-  // console.log(payment);
 
-  // if ((payment as any)?.transactionStatus) {
-  //   order = await order.updateOne({
-  //     transaction: {
-  //       id: (payment as any)?.sp_order_id,
-  //       transaction_status: (payment as any)?.transactionStatus,
-  //       checkout_url: (payment as any)?.checkout_url,
-  //     },
-  //   });
-  // }
   if ((payment as any)?.transactionStatus) {
     order = await order.updateOne({
       transaction: {
@@ -131,12 +93,13 @@ const createRentalTransactionIntoDB = async (
 
 const verifyPayment = async (orderId: string) => {
   const verifiedPayment = await OrderUtils.verifyPaymentAsync(orderId);
-  // console.log(verifiedPayment[0].sp_code); 
+
   if (verifiedPayment[0].sp_code === "1011") {
     throw new AppError(404, "Order not found!");
   }
+
   if (verifiedPayment.length) {
-    const updatedTransaction = await RentalTransaction.findOneAndUpdate(
+    const updatedTransaction = await RentalTransactionModel.findOneAndUpdate(
       {
         "transaction.id": orderId,
       },
@@ -148,11 +111,11 @@ const verifyPayment = async (orderId: string) => {
         "transaction.method": verifiedPayment[0].method,
         "transaction.date_time": verifiedPayment[0].date_time,
         status:
-          verifiedPayment[0].bank_status == "Success"
+          verifiedPayment[0].bank_status === "Success"
             ? "Paid"
-            : verifiedPayment[0].bank_status == "Failed"
+            : verifiedPayment[0].bank_status === "Failed"
             ? "Pending"
-            : verifiedPayment[0].bank_status == "Cancel"
+            : verifiedPayment[0].bank_status === "Cancel"
             ? "Cancelled"
             : "",
       },
@@ -164,12 +127,18 @@ const verifyPayment = async (orderId: string) => {
     }
 
     if (updatedTransaction?.transaction?.bank_status === "Success") {
-      await ProductModel.findByIdAndUpdate(updatedTransaction.product, {
-        houseStatus: "rented",
-      });
-      await Tenant.findByIdAndUpdate(updatedTransaction.tenantRequest, {
-        paymentStatus: "Paid",
-      });
+      await RentalHouseModel.findByIdAndUpdate(
+        updatedTransaction.rentalHouseId,
+        {
+          houseStatus: "rented",
+        }
+      );
+      await RentalRequestModel.findByIdAndUpdate(
+        updatedTransaction.rentalRequestId,
+        {
+          paymentStatus: "Paid",
+        }
+      );
     }
   }
 
@@ -178,31 +147,27 @@ const verifyPayment = async (orderId: string) => {
 
 const getTenantOrdersFromDB = async (email: string) => {
   const tenant = await User.findOne({ email });
-  // console.log("tenant", tenant); 
-  const result = await RentalTransaction.find({ tenant: tenant?._id })
-    .populate("tenant")
-    .populate("product");
-  return result;
+  return await RentalTransactionModel.find({ tenantId: tenant?._id })
+    .populate("tenantId")
+    .populate("rentalHouseId")
+    .populate("landlordId");
 };
 
 const getAllRentalOrdersFromDB = async () => {
-  const result = await RentalTransaction.find()
-    .populate("tenant")
-    .populate("product")
-    .populate("landlord");
-  return result;
+  return await RentalTransactionModel.find()
+    .populate("tenantId")
+    .populate("rentalHouseId")
+    .populate("landlordId");
 };
 
 const cancelRentalOrderFromDB = async (orderId: string, userId: string) => {
-  const order = await RentalTransaction.findById(orderId);
+  const order = await RentalTransactionModel.findById(orderId);
 
   if (!order) {
     throw new AppError(404, "Order not found or deleted");
   }
-  // console.log(order.tenant, userId); 
 
-  // Ensure only the correct tenant can cancel
-  if (String(order.tenant) !== String(userId)) {
+  if (String(order.tenantId) !== String(userId)) {
     throw new AppError(403, "You are not authorized to cancel this order");
   }
 
@@ -210,10 +175,8 @@ const cancelRentalOrderFromDB = async (orderId: string, userId: string) => {
     throw new AppError(400, "Paid orders cannot be cancelled");
   }
 
-  await RentalTransaction.findByIdAndDelete(orderId);
-
-  // Optionally revert houseStatus
-  await ProductModel.findByIdAndUpdate(order.product, {
+  await RentalTransactionModel.findByIdAndDelete(orderId);
+  await RentalHouseModel.findByIdAndUpdate(order.rentalHouseId, {
     houseStatus: "available",
   });
 

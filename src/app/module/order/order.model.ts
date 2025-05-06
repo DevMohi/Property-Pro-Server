@@ -3,19 +3,30 @@ import { TRentalTransaction } from "./order.interface";
 
 const rentalTransactionSchema = new Schema<TRentalTransaction>(
   {
-    tenantRequest: {
+    rentalRequestId: {
       type: Schema.Types.ObjectId,
-      ref: "Tenant",
+      ref: "RentalRequest", // previously Tenant
       required: true,
     },
-    tenant: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    product: {
+    tenantId: {
       type: Schema.Types.ObjectId,
-      ref: "Product",
+      ref: "User", // tenant user
       required: true,
     },
-    landlord: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    amount: { type: Number, required: true },
+    rentalHouseId: {
+      type: Schema.Types.ObjectId,
+      ref: "RentalHouse", // previously Product
+      required: true,
+    },
+    landlordId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    amount: {
+      type: Number,
+      required: true,
+    },
     status: {
       type: String,
       enum: ["Pending", "Paid", "Cancelled"],
@@ -23,18 +34,20 @@ const rentalTransactionSchema = new Schema<TRentalTransaction>(
     },
     transaction: {
       id: { type: String },
-      transaction_status: { type: String },
-      bank_status: { type: String },
-      sp_code: { type: String },
-      sp_message: { type: String },
-      method: { type: String },
-      date_time: { type: String },
+      transaction_status: String,
+      bank_status: String,
+      sp_code: String,
+      sp_message: String,
+      method: String,
+      date_time: String,
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-export const RentalTransaction = model<TRentalTransaction>(
+export const RentalTransactionModel = model<TRentalTransaction>(
   "RentalTransaction",
   rentalTransactionSchema
 );
