@@ -7,7 +7,7 @@ async function server() {
     await mongoose.connect(process.env.DATABASE_URL as string);
 
     app.listen(5000, () => {
-      console.log(`Basa Vara Server is running on port   - Alhamdulillah`);
+      console.log(`PropertyPro is up and running`);
     });
   } catch (error) {
     console.error(error);

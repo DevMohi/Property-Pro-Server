@@ -1,53 +1,54 @@
 import express from "express";
-import { ProductControllers } from "./rentalHouse.controller";
+import { RentalHouseControllers } from "./rentalHouse.controller";
 import { multerUpload } from "../../config/multer.config";
 import { parseBody } from "../../middlewares/bodyParser";
 import auth from "../../middlewares/auth";
 
 const router = express.Router();
 
-// Create a new product ----------done
+// ✅ Create a new rental house listing -> Works 
 router.post(
   "/landlords/listings",
   auth("landlord"),
   multerUpload.fields([{ name: "images" }]),
   parseBody,
-  ProductControllers.createProduct
+  RentalHouseControllers.createRentalHouse
 );
 
-// Get all products -------- done
-router.get("/landlords/listings", ProductControllers.getAllProducts);
+// ✅ Get all rental house listings -> Works 
+router.get("/landlords/listings", RentalHouseControllers.getAllRentalHouses);
 
-// Get a single product by ID----done
+// ✅ Get a single rental house listing by ID
 router.get(
-  "/landlords/listings/:productId",
-  ProductControllers.getSingleProduct
+  "/landlords/listings/:rentalHouseId",
+  RentalHouseControllers.getSingleRentalHouse
 );
 
-// Update a product by ID -----------
+// ✅ Update a rental house listing by ID -> Works 
 router.patch(
   "/landlords/listings/:id",
   auth("landlord"),
   multerUpload.fields([{ name: "images" }]),
   parseBody,
-  ProductControllers.updateProduct
+  RentalHouseControllers.updateRentalHouse
 );
 
-//Landlord postings
+// ✅ Get all listings by a specific landlord (authenticated) 
 router.get(
   "/landlords/my-postings",
   auth("landlord"),
-  ProductControllers.getLandlordPostings
+  RentalHouseControllers.getLandlordRentalHouses
 );
 
-//Respond to tenants
-router.put(
-  "/landlords/requests/:requestId",
-  auth("landlord"),
-  ProductControllers.respondToRentalRequest
-);
+// ✅ Respond to tenant rental request (approve/reject)
+// router.put(
+//   "/landlords/requests/:requestId",
+//   auth("landlord"),
+//   RentalHouseControllers.respondToRentalRequest
+// );
 
-// Delete a product by ID ---------- done
-router.delete("/:productId", ProductControllers.deleteProduct);
+// ✅ Delete a rental house listing by ID
+router.delete("/:rentalHouseId", RentalHouseControllers.deleteRentalHouse);
 
-export const ProductRoutes = router;
+// Exporting router
+export const RentalHouseRoutes = router;

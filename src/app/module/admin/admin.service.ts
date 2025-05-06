@@ -1,8 +1,9 @@
-import { ProductModel } from "../rentalHouse/rentalHouse.model";
+
+import { RentalHouseModel } from "../rentalHouse/rentalHouse.model";
 import User from "../user/user.model";
 
 const getAllHouses = async () => {
-  const result = await ProductModel.find();
+  const result = await RentalHouseModel.find();
   return result;
 };
 const getAllUsers = async () => {

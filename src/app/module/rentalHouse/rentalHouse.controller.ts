@@ -1,165 +1,151 @@
 /* eslint-disable no-console */
 import { Request, Response } from "express";
-import { ProductServices } from "./rentalHouse.service";
+import { RentalHouseServices } from "./rentalHouse.service";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { StatusCodes } from "http-status-codes";
 import { IImageFiles } from "../../middlewares/interface/IImageFile";
 
-const createProduct = catchAsync(async (req: Request, res: Response) => {
+// Create a new rental house listing
+const createRentalHouse = catchAsync(async (req: Request, res: Response) => {
   const landlordId = req?.user?.id;
-  // console.log(landlordId);
+  console.log(landlordId);
+  const rentalHouseData = { ...req.body, landlordId };
+  console.log(rentalHouseData);
 
-  const productData = { ...req.body, LandlordID: landlordId };
-
-  const result = await ProductServices.createProductIntoDB(
-    productData,
+  const result = await RentalHouseServices.createRentalHouseInDB(
+    rentalHouseData,
     req.files as IImageFiles
   );
+
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: "Listings created successfully",
+    message: "Rental house listing created successfully",
     data: result,
   });
 });
 
-const getAllProducts = catchAsync(async (_req: Request, res: Response) => {
-  const result = await ProductServices.getAllProductsFromDB();
+// Get all rental house listings
+const getAllRentalHouses = catchAsync(async (_req: Request, res: Response) => {
+  const result = await RentalHouseServices.getAllRentalHousesFromDB();
+
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: "Listings retrieved successfully",
+    message: "All rental listings retrieved successfully",
     data: result,
   });
 });
 
-const getSingleProduct = catchAsync(async (req: Request, res: Response) => {
-  const { productId } = req.params;
-  const result = await ProductServices.getSingleProductFromDB(productId);
+// Get a single rental house listing
+const getSingleRentalHouse = catchAsync(async (req: Request, res: Response) => {
+  const { rentalHouseId } = req.params;
+
+  const result = await RentalHouseServices.getSingleRentalHouseFromDB(
+    rentalHouseId
+  );
+
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: "Listing retrieved successfully",
+    message: "Rental house listing retrieved successfully",
     data: result,
   });
 });
 
-const updateProduct = catchAsync(async (req: Request, res: Response) => {
+// Update a rental house listing
+const updateRentalHouse = catchAsync(async (req: Request, res: Response) => {
   const landlordId = req?.user?.id;
-  const productId = req.params.id;
+  const rentalHouseId = req.params.id;
 
-  const updatedData = { ...req.body, LandlordID: landlordId };
+  const updatedData = { ...req.body, landlordId };
 
-  const result = await ProductServices.updateProductInDB(
-    productId,
+  const result = await RentalHouseServices.updateRentalHouseInDB(
+    rentalHouseId,
     updatedData
   );
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: "Listing updated successfully",
+    message: "Rental house listing updated successfully",
     data: result,
   });
 });
 
-// const updateProduct = async (req: Request, res: Response): Promise<void> => {
-//   try {
-//     const productId = req.params.productId;
-//     const images = req.files as IImageFiles;
-//     const data = { ...req.body, images };
+// Delete a rental house listing
+const deleteRentalHouse = catchAsync(async (req, res) => {
+  const { rentalHouseId } = req.params;
 
-//     const result = await ProductServices.updateProductInDB(productId, data);
+  const result = await RentalHouseServices.deleteRentalHouseFromDB(
+    rentalHouseId
+  );
 
-//     if (!result) {
-//       res.status(404).json({
-//         success: false,
-//         message: "Product not found",
-//       });
-//     }
+  if (!result) {
+    res.status(404).json({
+      success: false,
+      message: "Rental house not found",
+    });
+    return; // just stop here, don't return the res object
+  }
 
-//     res.status(200).json({
-//       success: true,
-//       message: "Product updated successfully",
-//       data: result,
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).json({
-//       success: false,
-//       message: "Failed to update Product",
-//     });
-//   }
-// };
+  res.status(200).json({
+    success: true,
+    message: "Rental house deleted successfully",
+    data: result,
+  });
+});
 
-const deleteProduct = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { productId } = req.params;
+// Get listings by landlord (private route)
+const getLandlordRentalHouses = catchAsync(
+  async (req: Request, res: Response) => {
+    const landlordId = req.user?.id;
+    console.log(landlordId);
 
-    const result = await ProductServices.deleteProductFromDB(productId);
+    const result = await RentalHouseServices.getLandlordRentalHouses(
+      landlordId
+    );
 
-    if (!result) {
-      res.status(404).json({
-        success: false,
-        message: "Product not found",
-      });
-    }
-
-    res.status(200).json({
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
       success: true,
-      message: "Product deleted successfully",
+      message: "Your rental house listings retrieved",
       data: result,
     });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete Product",
-    });
   }
-};
+);
 
-const respondToRentalRequest = catchAsync(async (req, res) => {
-  const { requestId } = req.params;
-  // console.log(requestId);
-  const { status, phoneNumber } = req.body;
-  const userId = req?.user?.id;
+// Respond to a rental request (approve/reject)
+// const respondToRentalRequest = catchAsync(
+//   async (req: Request, res: Response) => {
+//     const { requestId } = req.params;
+//     const { status, phoneNumber } = req.body;
+//     const userId = req?.user?.id;
 
-  const result = await ProductServices.respondToRentalRequestDB(
-    requestId,
-    status,
-    userId,
-    phoneNumber
-  );
-  sendResponse(res, {
-    statusCode: StatusCodes.OK,
-    success: true,
-    message: "Rental Request responded successfully",
-    data: result,
-  });
-});
+//     const result = await RentalHouseServices.respondToRentalRequestDB(
+//       requestId,
+//       status,
+//       userId,
+//       phoneNumber
+//     );
 
-const getLandlordPostings = catchAsync(async (req, res) => {
-  const landlordId = req.user?.id; // from auth middleware
+//     sendResponse(res, {
+//       statusCode: StatusCodes.OK,
+//       success: true,
+//       message: "Rental request responded to successfully",
+//       data: result,
+//     });
+//   }
+// );
 
-  const result = await ProductServices.getLandlordListings(landlordId);
-
-  sendResponse(res, {
-    statusCode: StatusCodes.OK,
-    success: true,
-    message: "Retrieved your postings",
-    data: result,
-    // data: null,
-  });
-});
-
-export const ProductControllers = {
-  createProduct,
-  getAllProducts,
-  getSingleProduct,
-  updateProduct,
-  deleteProduct,
-  getLandlordPostings,
-  respondToRentalRequest,
+// Export controller
+export const RentalHouseControllers = {
+  createRentalHouse,
+  getAllRentalHouses,
+  getSingleRentalHouse,
+  updateRentalHouse,
+  deleteRentalHouse,
+  getLandlordRentalHouses,
+  // respondToRentalRequest,
 };

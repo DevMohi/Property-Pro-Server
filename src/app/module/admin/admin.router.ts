@@ -4,7 +4,8 @@ import { USER_ROLE } from "../user/user.constants";
 import { adminController } from "./admin.controller";
 import { RentalControllers } from "../order/order.controller";
 import { multerUpload } from "../../config/multer.config";
-import { ProductControllers } from "../rentalHouse/rentalHouse.controller";
+import { RentalHouseControllers } from "../rentalHouse/rentalHouse.controller";
+
 import { parseBody } from "../../middlewares/bodyParser";
 
 const adminRouter = Router();
@@ -36,9 +37,8 @@ adminRouter.patch(
 // );
 
 adminRouter.delete(
-  "/listings/:productId",
+  "/listings/:rentalHouseId",
   auth(USER_ROLE.admin),
-  ProductControllers.deleteProduct
+  RentalHouseControllers.deleteRentalHouse
 );
-
 export default adminRouter;

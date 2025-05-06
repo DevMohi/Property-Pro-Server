@@ -1,169 +1,134 @@
 import mongoose from "mongoose";
-import { TProduct } from "./rentalHouse.interface";
-import { ProductModel } from "./rentalHouse.model";
+import { TRentalHouse } from "./rentalHouse.interface";
+import { RentalHouseModel } from "./rentalHouse.model";
 import AppError from "../../helpers/error";
 import { StatusCodes } from "http-status-codes";
 import { IImageFiles } from "../../middlewares/interface/IImageFile";
 import { Tenant } from "../tenant/tenant.model";
 import User from "../user/user.model";
 
-// Create a new product
-const createProductIntoDB = async (
-  productData: Partial<TProduct>,
-  productImages: IImageFiles
+// Create a new rental house listing
+const createRentalHouseInDB = async (
+  rentalHouseData: Partial<TRentalHouse>,
+  imageFiles: IImageFiles
 ) => {
-  const { images } = productImages;
+  const { images } = imageFiles;
   if (!images || images.length === 0) {
-    throw new AppError(StatusCodes.BAD_REQUEST, "Product images are required.");
-  }
-  productData.imageUrls = images.map((image) => image.path);
-  const result = await ProductModel.create(productData);
-  return result;
-};
-
-// Get all products
-const getAllProductsFromDB = async () => {
-  const result = await ProductModel.find();
-  return result;
-};
-
-// Get single product following by id
-const getSingleProductFromDB = async (id: string) => {
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return null;
+    throw new AppError(StatusCodes.BAD_REQUEST, "Images are required.");
   }
 
-  const result = await ProductModel.findById(id);
+  rentalHouseData.imageUrls = images.map((image) => image.path);
+  const result = await RentalHouseModel.create(rentalHouseData);
   return result;
 };
 
-// Update a product by ID
-// const updateProductInDB = async (id: string, data: TProduct) => {
+// Get all listings
+const getAllRentalHousesFromDB = async () => {
+  const result = await RentalHouseModel.find();
+  return result;
+};
 
-//   // Only run the mapping logic if user updated image data
-//   if (Array.isArray(data?.images?.images) && data.images?.images?.length > 0) {
-//     const picData = data.images.images;
-//     const pic = picData.map((image) => image?.path);
-//     data.imageUrls = pic;
-//   }
+// Get a single listing by ID
+const getSingleRentalHouseFromDB = async (id: string) => {
+  if (!mongoose.Types.ObjectId.isValid(id)) return null;
+  const result = await RentalHouseModel.findById(id);
+  return result;
+};
 
-//   const result = await ProductModel.findByIdAndUpdate(id, data, { new: true });
-//   return result;
-// };
-
-const updateProductInDB = async (
-  productId: string,
-  updatedData: Partial<TProduct>,
+// Update listing by ID
+const updateRentalHouseInDB = async (
+  rentalHouseId: string,
+  updatedData: Partial<TRentalHouse>
 ) => {
-  // Handle new file uploads (if any)
-  // if (files) {
-  //   if (files.images && Array.isArray(files.images)) {
-  //     updatedData.images = files.images.map(
-  //       (file) => (file as Express.Multer.File).path
-  //     );
-  //   }
-
-  //   if (files.thumbnail && Array.isArray(files.thumbnail)) {
-  //     // If you have thumbnail logic — otherwise ignore this
-  //     const thumbnailPath = (files.thumbnail[0] as Express.Multer.File).path;
-  //     // optionally: updatedData.thumbnail = thumbnailPath;
-  //     // But your TProduct does not include thumbnail
-  //   }
-  // }
-
-  const updatedProduct = await ProductModel.findByIdAndUpdate(
-    productId,
+  const result = await RentalHouseModel.findByIdAndUpdate(
+    rentalHouseId,
     updatedData,
-    {
-      new: true, // return the updated doc
-      runValidators: true,
-    }
+    { new: true, runValidators: true }
   );
 
-  if (!updatedProduct) {
-    throw new AppError(StatusCodes.NOT_FOUND, "Product not found");
+  if (!result) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Rental house not found");
   }
 
-  return updatedProduct;
+  return result;
 };
 
-//respond to requests
-const respondToRentalRequestDB = async (
-  requestId: string,
-  status: "Approved" | "Rejected",
-  userId: string,
-  phoneNumber?: string
-) => {
-  const request = await Tenant.findById(requestId);
-
-  if (!request) {
-    throw new AppError(400, "Tenant Request Not found");
-  }
-
-  const product = await ProductModel.findById(request.products);
-  if (!product) {
-    throw new AppError(400, "Product Not found");
-  }
-
-  const landlord = await User.findById(product.LandlordID);
-  if (!landlord) {
-    throw new AppError(400, "User Not found");
-  }
-
-  // console.log(product.LandlordID.toString(), userId);
-
-  if (product.LandlordID.toString() !== userId) {
-    // console.log("Inside here");
-    throw new AppError(
-      400,
-      "You are not authorized to respond to this request"
-    );
-  }
-
-  // If status is "Approved", check if the landlord's phone number is provided
-  const landlordPhone = landlord.phone || phoneNumber;
-  if (status === "Approved") {
-    if (!landlord?.phone) {
-      if (!landlordPhone) {
-        throw new AppError(404, "Phone number is required");
-      }
-      request.phone = landlordPhone;
-    } else {
-      request.phone = landlordPhone;
-    }
-  } else if (status === "Rejected") {
-    request.phone = landlordPhone;
-  }
-
-  request.status = status; // Update the status to Approved/Rejected
-  await request.save(); // Save the changes
-
-  return request;
+// Delete a listing by ID
+const deleteRentalHouseFromDB = async (
+  id: string
+): Promise<TRentalHouse | null> => {
+  if (!mongoose.Types.ObjectId.isValid(id)) return null;
+  return await RentalHouseModel.findOneAndDelete({ _id: id });
 };
 
 //landlord can retrieve its own listings
-
-const getLandlordListings = async (landlordId: string) => {
-  const result = await ProductModel.find({ LandlordID: landlordId });
+const getLandlordRentalHouses = async (landlordId: string) => {
+  console.log("Inside", landlordId);
+  const result = await RentalHouseModel.find({ landlordId });
   return result;
 };
 
-// Delete a product by ID
-const deleteProductFromDB = async (id: string): Promise<TProduct | null> => {
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return null;
-  }
-  const result = await ProductModel.findOneAndDelete({ _id: id });
-  return result;
-};
+// Respond to a rental request (approve/reject)
+// const respondToRentalRequestDB = async (
+//   requestId: string,
+//   status: "Approved" | "Rejected",
+//   userId: string,
+//   phoneNumber?: string
+// ) => {
+//   const request = await Tenant.findById(requestId);
 
-//all service is exported from this function
-export const ProductServices = {
-  createProductIntoDB,
-  getAllProductsFromDB,
-  getSingleProductFromDB,
-  updateProductInDB,
-  getLandlordListings,
-  respondToRentalRequestDB,
-  deleteProductFromDB,
+//   if (!request) {
+//     throw new AppError(400, "Tenant Request Not found");
+//   }
+
+//   const product = await RentalHouseModel.findById(request.products);
+//   if (!product) {
+//     throw new AppError(400, "Product Not found");
+//   }
+
+//   const landlord = await User.findById(product.LandlordID);
+//   if (!landlord) {
+//     throw new AppError(400, "User Not found");
+//   }
+
+//   // console.log(product.LandlordID.toString(), userId);
+
+//   if (product.LandlordID.toString() !== userId) {
+//     // console.log("Inside here");
+//     throw new AppError(
+//       400,
+//       "You are not authorized to respond to this request"
+//     );
+//   }
+
+//   // If status is "Approved", check if the landlord's phone number is provided
+//   const landlordPhone = landlord.phone || phoneNumber;
+//   if (status === "Approved") {
+//     if (!landlord?.phone) {
+//       if (!landlordPhone) {
+//         throw new AppError(404, "Phone number is required");
+//       }
+//       request.phone = landlordPhone;
+//     } else {
+//       request.phone = landlordPhone;
+//     }
+//   } else if (status === "Rejected") {
+//     request.phone = landlordPhone;
+//   }
+
+//   request.status = status; // Update the status to Approved/Rejected
+//   await request.save(); // Save the changes
+
+//   return request;
+// };
+
+// Exporting all services
+export const RentalHouseServices = {
+  createRentalHouseInDB,
+  getAllRentalHousesFromDB,
+  getSingleRentalHouseFromDB,
+  updateRentalHouseInDB,
+  deleteRentalHouseFromDB,
+  getLandlordRentalHouses,
+  // respondToRentalRequestDB,
 };

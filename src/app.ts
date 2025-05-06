@@ -6,11 +6,11 @@ import { OrderRoutes } from "./app/module/order/order.routes";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
-import { ProductRoutes } from "./app/module/rentalHouse/rentalHouse.routes";
 import { TenantRouter } from "./app/module/tenant/tenant.routes";
 import { globalErrorHandler } from "./app/middlewares/globalErrorHandler";
 import notFound from "./app/middlewares/notFound";
 import adminRouter from "./app/module/admin/admin.router";
+import { RentalHouseRoutes } from "./app/module/rentalHouse/rentalHouse.routes";
 
 const app = express();
 //parsers
@@ -22,7 +22,7 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "http://localhost:3000",
-      "https://basa-vara-client.vercel.app",
+      // "https://basa-vara-client.vercel.app",
     ],
     credentials: true,
   })
@@ -33,7 +33,7 @@ app.use(express.json());
 
 app.use("/auth", authRouter);
 
-app.use("/", ProductRoutes);
+app.use("/", RentalHouseRoutes);
 app.use("/admin", adminRouter);
 
 app.use("/user", userRouter);

@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
-export type TProduct = {
-  title: string; //add
+export type TRentalHouse = {
+  title: string;
   location: string;
   description: string;
   rent: string;
@@ -9,7 +9,7 @@ export type TProduct = {
   bathrooms: string;
   imageUrls: string[];
   images?: string[];
-  LandlordID: Types.ObjectId;
+  landlordId: Types.ObjectId;
   area: string;
   houseStatus?: "available" | "rented";
 };

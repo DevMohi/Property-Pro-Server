@@ -1,7 +1,7 @@
 import { Schema, model, Types } from "mongoose";
-import { TProduct } from "./rentalHouse.interface";
+import { TRentalHouse } from "./rentalHouse.interface";
 
-const productSchema = new Schema<TProduct>(
+const rentalHouseSchema = new Schema<TRentalHouse>(
   {
     title: {
       type: String,
@@ -32,10 +32,9 @@ const productSchema = new Schema<TProduct>(
       type: [String],
       required: [true, "Product images are required"],
     },
-    LandlordID: {
+    landlordId: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      // required: [true, "LandlordID is required"], 
     },
     area: {
       type: String,
@@ -52,4 +51,7 @@ const productSchema = new Schema<TProduct>(
   }
 );
 
-export const ProductModel = model<TProduct>("Product", productSchema);
+export const RentalHouseModel = model<TRentalHouse>(
+  "RentalHouse",
+  rentalHouseSchema
+);
