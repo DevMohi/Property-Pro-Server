@@ -28,7 +28,7 @@ const createRentalHouse = catchAsync(async (req: Request, res: Response) => {
 
 // Get all rental house listings
 const getAllRentalHouses = catchAsync(async (_req: Request, res: Response) => {
-  const result = await RentalHouseServices.getAllRentalHousesFromDB();
+  const result = (await RentalHouseServices.getAllRentalHousesFromDB());
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
@@ -77,6 +77,7 @@ const updateRentalHouse = catchAsync(async (req: Request, res: Response) => {
 // Delete a rental house listing
 const deleteRentalHouse = catchAsync(async (req, res) => {
   const { rentalHouseId } = req.params;
+  console.log(rentalHouseId);
 
   const result = await RentalHouseServices.deleteRentalHouseFromDB(
     rentalHouseId

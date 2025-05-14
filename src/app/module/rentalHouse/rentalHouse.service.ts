@@ -22,16 +22,14 @@ const createRentalHouseInDB = async (
   return result;
 };
 
-// Get all listings
 const getAllRentalHousesFromDB = async () => {
-  const result = await RentalHouseModel.find();
+  const result = await RentalHouseModel.find().populate("landlordId");
   return result;
 };
 
-// Get a single listing by ID
 const getSingleRentalHouseFromDB = async (id: string) => {
   if (!mongoose.Types.ObjectId.isValid(id)) return null;
-  const result = await RentalHouseModel.findById(id);
+  const result = await RentalHouseModel.findById(id).populate("landlordId");
   return result;
 };
 
@@ -57,14 +55,22 @@ const updateRentalHouseInDB = async (
 const deleteRentalHouseFromDB = async (
   id: string
 ): Promise<TRentalHouse | null> => {
-  if (!mongoose.Types.ObjectId.isValid(id)) return null;
-  return await RentalHouseModel.findOneAndDelete({ _id: id });
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return null; // If the ID is not valid, return null
+  }
+
+  // Use findByIdAndDelete to delete by ID
+  const deletedRentalHouse = await RentalHouseModel.findByIdAndDelete(id);
+
+  return deletedRentalHouse; // Will return null if not found, or the deleted house data
 };
 
 //landlord can retrieve its own listings
 const getLandlordRentalHouses = async (landlordId: string) => {
   console.log("Inside", landlordId);
-  const result = await RentalHouseModel.find({ landlordId });
+  const result = await RentalHouseModel.find({ landlordId }).populate(
+    "landlordId"
+  );
   return result;
 };
 

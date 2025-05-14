@@ -12,130 +12,91 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProductServices = void 0;
+exports.RentalHouseServices = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const rentalHouse_model_1 = require("./rentalHouse.model");
 const error_1 = __importDefault(require("../../helpers/error"));
 const http_status_codes_1 = require("http-status-codes");
-const tenant_model_1 = require("../tenant/tenant.model");
 const user_model_1 = __importDefault(require("../user/user.model"));
-// Create a new product
-const createProductIntoDB = (productData, productImages) => __awaiter(void 0, void 0, void 0, function* () {
-    const { images } = productImages;
+const rentalRequest_model_1 = require("../rentalRequest/rentalRequest.model");
+// Create a new rental house listing
+const createRentalHouseInDB = (rentalHouseData, imageFiles) => __awaiter(void 0, void 0, void 0, function* () {
+    const { images } = imageFiles;
     if (!images || images.length === 0) {
-        throw new error_1.default(http_status_codes_1.StatusCodes.BAD_REQUEST, "Product images are required.");
+        throw new error_1.default(http_status_codes_1.StatusCodes.BAD_REQUEST, "Images are required.");
     }
-    productData.imageUrls = images.map((image) => image.path);
-    const result = yield rentalHouse_model_1.ProductModel.create(productData);
+    rentalHouseData.imageUrls = images.map((image) => image.path);
+    const result = yield rentalHouse_model_1.RentalHouseModel.create(rentalHouseData);
     return result;
 });
-// Get all products
-const getAllProductsFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield rentalHouse_model_1.ProductModel.find();
+const getAllRentalHousesFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield rentalHouse_model_1.RentalHouseModel.find().populate("landlordId");
     return result;
 });
-// Get single product following by id
-const getSingleProductFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!mongoose_1.default.Types.ObjectId.isValid(id)) {
+const getSingleRentalHouseFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!mongoose_1.default.Types.ObjectId.isValid(id))
         return null;
-    }
-    const result = yield rentalHouse_model_1.ProductModel.findById(id);
+    const result = yield rentalHouse_model_1.RentalHouseModel.findById(id).populate("landlordId");
     return result;
 });
-// Update a product by ID
-// const updateProductInDB = async (id: string, data: TProduct) => {
-//   // Only run the mapping logic if user updated image data
-//   if (Array.isArray(data?.images?.images) && data.images?.images?.length > 0) {
-//     const picData = data.images.images;
-//     const pic = picData.map((image) => image?.path);
-//     data.imageUrls = pic;
-//   }
-//   const result = await ProductModel.findByIdAndUpdate(id, data, { new: true });
-//   return result;
-// };
-const updateProductInDB = (productId, updatedData) => __awaiter(void 0, void 0, void 0, function* () {
-    // Handle new file uploads (if any)
-    // if (files) {
-    //   if (files.images && Array.isArray(files.images)) {
-    //     updatedData.images = files.images.map(
-    //       (file) => (file as Express.Multer.File).path
-    //     );
-    //   }
-    //   if (files.thumbnail && Array.isArray(files.thumbnail)) {
-    //     // If you have thumbnail logic — otherwise ignore this
-    //     const thumbnailPath = (files.thumbnail[0] as Express.Multer.File).path;
-    //     // optionally: updatedData.thumbnail = thumbnailPath;
-    //     // But your TProduct does not include thumbnail
-    //   }
-    // }
-    const updatedProduct = yield rentalHouse_model_1.ProductModel.findByIdAndUpdate(productId, updatedData, {
-        new: true, // return the updated doc
-        runValidators: true,
-    });
-    if (!updatedProduct) {
-        throw new error_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, "Product not found");
+// Update listing by ID
+const updateRentalHouseInDB = (rentalHouseId, updatedData) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield rentalHouse_model_1.RentalHouseModel.findByIdAndUpdate(rentalHouseId, updatedData, { new: true, runValidators: true });
+    if (!result) {
+        throw new error_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, "Rental house not found");
     }
-    return updatedProduct;
+    return result;
 });
-//respond to requests
-const respondToRentalRequestDB = (requestId, status, userId, phoneNumber) => __awaiter(void 0, void 0, void 0, function* () {
-    const request = yield tenant_model_1.Tenant.findById(requestId);
-    if (!request) {
-        throw new error_1.default(400, "Tenant Request Not found");
+// Delete a listing by ID
+const deleteRentalHouseFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!mongoose_1.default.Types.ObjectId.isValid(id)) {
+        return null; // If the ID is not valid, return null
     }
-    const product = yield rentalHouse_model_1.ProductModel.findById(request.products);
-    if (!product) {
-        throw new error_1.default(400, "Product Not found");
-    }
-    const landlord = yield user_model_1.default.findById(product.LandlordID);
-    if (!landlord) {
-        throw new error_1.default(400, "User Not found");
-    }
-    // console.log(product.LandlordID.toString(), userId);
-    if (product.LandlordID.toString() !== userId) {
-        // console.log("Inside here");
-        throw new error_1.default(400, "You are not authorized to respond to this request");
-    }
-    // If status is "Approved", check if the landlord's phone number is provided
-    const landlordPhone = landlord.phone || phoneNumber;
-    if (status === "Approved") {
-        if (!(landlord === null || landlord === void 0 ? void 0 : landlord.phone)) {
-            if (!landlordPhone) {
-                throw new error_1.default(404, "Phone number is required");
-            }
-            request.phone = landlordPhone;
-        }
-        else {
-            request.phone = landlordPhone;
-        }
-    }
-    else if (status === "Rejected") {
-        request.phone = landlordPhone;
-    }
-    request.status = status; // Update the status to Approved/Rejected
-    yield request.save(); // Save the changes
-    return request;
+    // Use findByIdAndDelete to delete by ID
+    const deletedRentalHouse = yield rentalHouse_model_1.RentalHouseModel.findByIdAndDelete(id);
+    return deletedRentalHouse; // Will return null if not found, or the deleted house data
 });
 //landlord can retrieve its own listings
-const getLandlordListings = (landlordId) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield rentalHouse_model_1.ProductModel.find({ LandlordID: landlordId });
+const getLandlordRentalHouses = (landlordId) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("Inside", landlordId);
+    const result = yield rentalHouse_model_1.RentalHouseModel.find({ landlordId }).populate("landlordId");
     return result;
 });
-// Delete a product by ID
-const deleteProductFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!mongoose_1.default.Types.ObjectId.isValid(id)) {
-        return null;
+// Respond to a rental request (approve/reject)
+const respondToRentalRequestDB = (requestId, status, userId, phoneNumber) => __awaiter(void 0, void 0, void 0, function* () {
+    const rentalRequest = yield rentalRequest_model_1.RentalRequestModel.findById(requestId);
+    if (!rentalRequest) {
+        throw new error_1.default(400, "Rental request not found");
     }
-    const result = yield rentalHouse_model_1.ProductModel.findOneAndDelete({ _id: id });
-    return result;
+    const rentalHouse = yield rentalHouse_model_1.RentalHouseModel.findById(rentalRequest.rentalHouseId);
+    if (!rentalHouse) {
+        throw new error_1.default(400, "Rental house not found");
+    }
+    const landlord = yield user_model_1.default.findById(rentalHouse.landlordId);
+    if (!landlord) {
+        throw new error_1.default(400, "Landlord not found");
+    }
+    // Authorization check: only the actual landlord can respond
+    if (String(rentalHouse.landlordId) !== String(userId)) {
+        throw new error_1.default(403, "You are not authorized to respond to this request");
+    }
+    const finalPhoneNumber = landlord.phone || phoneNumber;
+    if (status === "Approved" && !finalPhoneNumber) {
+        throw new error_1.default(400, "Phone number is required to approve this request");
+    }
+    rentalRequest.status = status;
+    if (status === "Approved") {
+        rentalRequest.phone = finalPhoneNumber;
+    }
+    yield rentalRequest.save();
+    return rentalRequest;
 });
-//all service is exported from this function
-exports.ProductServices = {
-    createProductIntoDB,
-    getAllProductsFromDB,
-    getSingleProductFromDB,
-    updateProductInDB,
-    getLandlordListings,
+exports.RentalHouseServices = {
+    createRentalHouseInDB,
+    getAllRentalHousesFromDB,
+    getSingleRentalHouseFromDB,
+    updateRentalHouseInDB,
+    deleteRentalHouseFromDB,
+    getLandlordRentalHouses,
     respondToRentalRequestDB,
-    deleteProductFromDB,
 };

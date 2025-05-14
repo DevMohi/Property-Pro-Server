@@ -1,21 +1,32 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RentalTransaction = void 0;
+exports.RentalTransactionModel = void 0;
 const mongoose_1 = require("mongoose");
 const rentalTransactionSchema = new mongoose_1.Schema({
-    tenantRequest: {
+    rentalRequestId: {
         type: mongoose_1.Schema.Types.ObjectId,
-        ref: "Tenant",
+        ref: "RentalRequest", // previously Tenant
         required: true,
     },
-    tenant: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
-    product: {
+    tenantId: {
         type: mongoose_1.Schema.Types.ObjectId,
-        ref: "Product",
+        ref: "User", // tenant user
         required: true,
     },
-    landlord: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
-    amount: { type: Number, required: true },
+    rentalHouseId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "RentalHouse", // previously Product
+        required: true,
+    },
+    landlordId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
+    amount: {
+        type: Number,
+        required: true,
+    },
     status: {
         type: String,
         enum: ["Pending", "Paid", "Cancelled"],
@@ -23,12 +34,14 @@ const rentalTransactionSchema = new mongoose_1.Schema({
     },
     transaction: {
         id: { type: String },
-        transaction_status: { type: String },
-        bank_status: { type: String },
-        sp_code: { type: String },
-        sp_message: { type: String },
-        method: { type: String },
-        date_time: { type: String },
+        transaction_status: String,
+        bank_status: String,
+        sp_code: String,
+        sp_message: String,
+        method: String,
+        date_time: String,
     },
-}, { timestamps: true });
-exports.RentalTransaction = (0, mongoose_1.model)("RentalTransaction", rentalTransactionSchema);
+}, {
+    timestamps: true,
+});
+exports.RentalTransactionModel = (0, mongoose_1.model)("RentalTransaction", rentalTransactionSchema);

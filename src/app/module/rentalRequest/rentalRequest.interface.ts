@@ -9,4 +9,5 @@ export type TRentalRequest = {
   message: string;
   phone?: string;
   status: "Pending" | "Approved" | "Rejected";
+  paymentStatus?: "Pending" | "Paid";
 };

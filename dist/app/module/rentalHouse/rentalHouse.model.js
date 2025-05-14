@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProductModel = void 0;
+exports.RentalHouseModel = void 0;
 const mongoose_1 = require("mongoose");
-const productSchema = new mongoose_1.Schema({
+const rentalHouseSchema = new mongoose_1.Schema({
     title: {
         type: String,
         required: [true, "Title is required"],
@@ -32,10 +32,9 @@ const productSchema = new mongoose_1.Schema({
         type: [String],
         required: [true, "Product images are required"],
     },
-    LandlordID: {
+    landlordId: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "User",
-        // required: [true, "LandlordID is required"], 
     },
     area: {
         type: String,
@@ -49,4 +48,4 @@ const productSchema = new mongoose_1.Schema({
 }, {
     timestamps: true,
 });
-exports.ProductModel = (0, mongoose_1.model)("Product", productSchema);
+exports.RentalHouseModel = (0, mongoose_1.model)("RentalHouse", rentalHouseSchema);

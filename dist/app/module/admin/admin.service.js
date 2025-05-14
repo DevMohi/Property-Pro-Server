@@ -16,7 +16,7 @@ exports.adminService = void 0;
 const rentalHouse_model_1 = require("../rentalHouse/rentalHouse.model");
 const user_model_1 = __importDefault(require("../user/user.model"));
 const getAllHouses = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield rentalHouse_model_1.ProductModel.find();
+    const result = yield rentalHouse_model_1.RentalHouseModel.find();
     return result;
 });
 const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {

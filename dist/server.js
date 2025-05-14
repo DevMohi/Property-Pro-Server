@@ -20,7 +20,7 @@ function server() {
         try {
             yield mongoose_1.default.connect(process.env.DATABASE_URL);
             app_1.default.listen(5000, () => {
-                console.log(`Basa Vara Server is running on port   - Alhamdulillah`);
+                console.log(`PropertyPro is up and running`);
             });
         }
         catch (error) {

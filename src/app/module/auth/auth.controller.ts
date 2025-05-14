@@ -16,9 +16,9 @@ const register = catchAsync(async (req, res) => {
   });
 });
 
-const login = catchAsync(async (req, res) => { 
+const login = catchAsync(async (req, res) => {
   const result = await AuthService.login(req.body);
-  const { refreshToken } = result;  
+  const { refreshToken } = result;
 
   res.cookie("refreshToken", refreshToken, {
     secure: process.env.NODE_ENV === "production",
@@ -33,7 +33,7 @@ const login = catchAsync(async (req, res) => {
     success: true,
     message: "Login successful",
     data: {
-      token: result?.accessToken || "",
+      accessToken: result?.accessToken || "",
     },
   });
 });
@@ -55,7 +55,7 @@ const changePassword = catchAsync(async (req, res) => {
 
 const refreshToken = catchAsync(async (req, res) => {
   const { refreshToken } = req.cookies;
-  // console.log("Cookies", refreshToken); 
+  // console.log("Cookies", refreshToken);
   const result = await AuthService.regenerateAcessToken(refreshToken);
 
   sendResponse(res, {

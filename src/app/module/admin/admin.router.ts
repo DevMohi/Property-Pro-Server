@@ -2,7 +2,7 @@ import { Router } from "express";
 import auth from "../../middlewares/auth";
 import { USER_ROLE } from "../user/user.constants";
 import { adminController } from "./admin.controller";
-import { RentalControllers } from "../order/order.controller";
+
 import { multerUpload } from "../../config/multer.config";
 import { RentalHouseControllers } from "../rentalHouse/rentalHouse.controller";
 
@@ -22,6 +22,18 @@ adminRouter.get(
   adminController.getAllUsersByAdmin
 );
 
+adminRouter.get(
+  "/rental-requests",
+  auth(USER_ROLE.admin),
+  adminController.getAllRentalRequests
+);
+
+adminRouter.get(
+  "/rental-transactions",
+  auth(USER_ROLE.admin),
+  adminController.getAllRentalTransactions
+);
+
 adminRouter.patch(
   "/user/:id",
   auth(USER_ROLE.admin),
@@ -36,9 +48,4 @@ adminRouter.patch(
 //   ProductControllers.updateProduct
 // );
 
-adminRouter.delete(
-  "/listings/:rentalHouseId",
-  auth(USER_ROLE.admin),
-  RentalHouseControllers.deleteRentalHouse
-);
 export default adminRouter;

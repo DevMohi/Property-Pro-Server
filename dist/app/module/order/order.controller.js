@@ -1,7 +1,4 @@
 "use strict";
-// import { RequestHandler } from "express";
-// import { createRentalTransaction } from "./rentalTransaction.service";
-// import catchAsync from "../../utils/catchAsync";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -15,67 +12,59 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RentalControllers = void 0;
+exports.RentalTransactionControllers = void 0;
 const error_1 = __importDefault(require("../../helpers/error"));
 const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const order_service_1 = require("./order.service");
-//   const tenantId = req.params.tenantId;
-//   const user = req.user;
-//   const client_ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-//   const checkoutUrl = await createRentalTransaction(tenantId, user, client_ip as string);
-//   res.status(200).json({
-//     success: true,
-//     message: "Redirect to ShurjoPay",
-//     data: checkoutUrl,
-//   });
-// });
+// POST /order/rental-payment
 const makeRentalPayment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    // console.log(req.body); 
     if (!req.user) {
         throw new error_1.default(401, "Unauthorized: User not found in request");
     }
-    const { tenantRequest } = req.body;
-    const result = yield order_service_1.RentalServices.createRentalTransactionIntoDB(tenantRequest, req.user, req.ip);
+    const { rentalRequestId } = req.body;
+    const result = yield order_service_1.RentalServices.createRentalTransactionIntoDB(rentalRequestId, req.user, req.ip);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
-        message: "Renting Payment Intitiated Successfully",
+        message: "Rental payment initiated successfully",
         data: result,
-        // data: result,
     });
 }));
-// Order Verify Controllers
-const rentalVerify = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    // console.log(req?.query?.id); 
-    const result = yield order_service_1.RentalServices.verifyPayment(req.query.orderId);
+// GET /order/verify?orderId=...
+const paymentVerify = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { orderId } = req.query;
+    const result = yield order_service_1.RentalServices.verifyPayment(orderId);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
-        message: "Order Verified Successful",
+        message: "Order verified successfully",
         data: result,
     });
 }));
+// GET /order/my-order
 const getTenantOrders = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    const result = yield order_service_1.RentalServices.getTenantOrdersFromDB((_a = req === null || req === void 0 ? void 0 : req.user) === null || _a === void 0 ? void 0 : _a.email);
+    const email = (_a = req === null || req === void 0 ? void 0 : req.user) === null || _a === void 0 ? void 0 : _a.email;
+    const result = yield order_service_1.RentalServices.getTenantOrdersFromDB(email);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
-        message: "Your orders that have been paid or ordered recieved successfully",
+        message: "Your rental transactions retrieved successfully",
         data: result,
     });
 }));
-//For admin too see
-const getAllRentalOrders = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// GET /order/all-orders (admin)
+const getAllRentalOrders = (0, catchAsync_1.default)((_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield order_service_1.RentalServices.getAllRentalOrdersFromDB();
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
-        message: "All Rental Orders Retrieved Successfully",
+        message: "All rental transactions retrieved successfully",
         data: result,
     });
 }));
+// DELETE /order/cancel-order/:id
 const cancelRentalOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const orderId = req.params.id;
@@ -88,9 +77,9 @@ const cancelRentalOrder = (0, catchAsync_1.default)((req, res) => __awaiter(void
         data: result,
     });
 }));
-exports.RentalControllers = {
+exports.RentalTransactionControllers = {
     makeRentalPayment,
-    rentalVerify,
+    paymentVerify,
     getTenantOrders,
     getAllRentalOrders,
     cancelRentalOrder,

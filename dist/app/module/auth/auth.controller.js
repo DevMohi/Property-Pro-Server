@@ -54,7 +54,7 @@ const login = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, 
         success: true,
         message: "Login successful",
         data: {
-            token: (result === null || result === void 0 ? void 0 : result.accessToken) || "",
+            accessToken: (result === null || result === void 0 ? void 0 : result.accessToken) || "",
         },
     });
 }));
@@ -73,7 +73,7 @@ const changePassword = (0, catchAsync_1.default)((req, res) => __awaiter(void 0,
 }));
 const refreshToken = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { refreshToken } = req.cookies;
-    // console.log("Cookies", refreshToken); 
+    // console.log("Cookies", refreshToken);
     const result = yield auth_service_1.AuthService.regenerateAcessToken(refreshToken);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,

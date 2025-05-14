@@ -9,7 +9,7 @@ const router = express.Router();
 
 // ✅ Create a new rental house listing -> Works
 router.post(
-  "/landlords/listings",
+  "/listings",
   auth("landlord"),
   multerUpload.fields([{ name: "images" }]),
   parseBody,
@@ -17,18 +17,18 @@ router.post(
 );
 
 // ✅ Get all rental house listings -> Works
-router.get("/landlords/listings", RentalHouseControllers.getAllRentalHouses);
+router.get("/listings", RentalHouseControllers.getAllRentalHouses);
 
 // ✅ Get a single rental house listing by ID
 router.get(
-  "/landlords/listings/:rentalHouseId",
+  "/listings/:rentalHouseId",
   RentalHouseControllers.getSingleRentalHouse
 );
 
 // ✅ Update a rental house listing by ID -> Works
 router.patch(
-  "/landlords/listings/:id",
-  auth("landlord"),
+  "/listings/:id",
+  auth("admin", "landlord"),
   multerUpload.fields([{ name: "images" }]),
   parseBody,
   RentalHouseControllers.updateRentalHouse
@@ -36,20 +36,24 @@ router.patch(
 
 // ✅ Get all listings by a specific landlord (authenticated)
 router.get(
-  "/landlords/my-postings",
+  "/my-postings",
   auth("landlord"),
   RentalHouseControllers.getLandlordRentalHouses
 );
 
 // ✅ Respond to tenant rental request (approve/reject)
 router.put(
-  "/landlords/requests/:requestId",
+  "/requests/:requestId",
   auth("landlord"),
   RentalHouseControllers.respondToRentalRequest
 );
 
 // ✅ Delete a rental house listing by ID
-router.delete("/:rentalHouseId", RentalHouseControllers.deleteRentalHouse);
+router.delete(
+  "/:rentalHouseId",
+  auth("admin", "landlord"),
+  RentalHouseControllers.deleteRentalHouse
+);
 
 // Exporting router
 export const RentalHouseRoutes = router;

@@ -20,7 +20,7 @@ app.use(
       "http://localhost:5173",
       "http://localhost:5174",
       "http://localhost:3000",
-      // "https://basa-vara-client.vercel.app",
+      "https://property-pro-client.vercel.app",
     ],
     credentials: true,
   })
@@ -31,7 +31,7 @@ app.use(express.json());
 
 app.use("/auth", authRouter);
 
-app.use("/", RentalHouseRoutes);
+app.use("/landlords", RentalHouseRoutes);
 app.use("/admin", adminRouter);
 
 app.use("/user", userRouter);

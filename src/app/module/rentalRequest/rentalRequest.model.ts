@@ -38,6 +38,11 @@ const rentalRequestSchema = new Schema<TRentalRequest>(
       enum: ["Pending", "Approved", "Rejected"],
       default: "Pending",
     },
+    paymentStatus: {
+      type: String,
+      enum: ["Pending", "Paid"],
+      default: "Pending",
+    },
   },
   {
     timestamps: true,
