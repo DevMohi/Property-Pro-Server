@@ -21,9 +21,7 @@ const http_status_codes_1 = require("http-status-codes");
 const createRentalHouse = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const landlordId = (_a = req === null || req === void 0 ? void 0 : req.user) === null || _a === void 0 ? void 0 : _a.id;
-    console.log(landlordId);
     const rentalHouseData = Object.assign(Object.assign({}, req.body), { landlordId });
-    console.log(rentalHouseData);
     const result = yield rentalHouse_service_1.RentalHouseServices.createRentalHouseInDB(rentalHouseData, req.files);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -32,14 +30,15 @@ const createRentalHouse = (0, catchAsync_1.default)((req, res) => __awaiter(void
         data: result,
     });
 }));
-// Get all rental house listings
-const getAllRentalHouses = (0, catchAsync_1.default)((_req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = (yield rentalHouse_service_1.RentalHouseServices.getAllRentalHousesFromDB());
+// Get all rental house listings -> pagination done here
+const getAllRentalHouses = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield rentalHouse_service_1.RentalHouseServices.getAllRentalHousesFromDB(req.query);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_codes_1.StatusCodes.OK,
         success: true,
         message: "All rental listings retrieved successfully",
-        data: result,
+        meta: result.meta,
+        data: result.result,
     });
 }));
 // Get a single rental house listing

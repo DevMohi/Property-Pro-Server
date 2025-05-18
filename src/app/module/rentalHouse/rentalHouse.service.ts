@@ -6,6 +6,8 @@ import { StatusCodes } from "http-status-codes";
 import { IImageFiles } from "../../middlewares/interface/IImageFile";
 import User from "../user/user.model";
 import { RentalRequestModel } from "../rentalRequest/rentalRequest.model";
+import { query } from "express";
+import QueryBuilder from "../../builder/querybuilder";
 
 // Create a new rental house listing
 const createRentalHouseInDB = async (
@@ -22,9 +24,41 @@ const createRentalHouseInDB = async (
   return result;
 };
 
-const getAllRentalHousesFromDB = async () => {
-  const result = await RentalHouseModel.find().populate("landlordId");
-  return result;
+const getAllRentalHousesFromDB = async (query: Record<string, unknown>) => {
+  const rentalHouseQuery = new QueryBuilder(
+    RentalHouseModel.find(),
+    query
+  ).paginate();
+
+  const result = await rentalHouseQuery.modelQuery;
+  const meta = await rentalHouseQuery.countTotal();
+
+  return {
+    meta,
+    result,
+  };
+};
+// const getLandlordRentalHouses = async (landlordId: string) => {
+
+//   const result = await RentalHouseModel.find({ landlordId }).populate(
+//     "landlordId"
+//   );
+//   return result;
+// };
+
+const getLandlordRentalHouses = async (
+  landlordId: string,
+  query: Record<string, unknown>
+) => {
+  const rentalHouseQuery = new QueryBuilder(
+    RentalHouseModel.find({ landlordId }),
+    query
+  ).paginate();
+
+  const result = await rentalHouseQuery.modelQuery.populate("landlordId");
+  const meta = await rentalHouseQuery.countTotal();
+
+  return { result, meta };
 };
 
 const getSingleRentalHouseFromDB = async (id: string) => {
@@ -63,15 +97,6 @@ const deleteRentalHouseFromDB = async (
   const deletedRentalHouse = await RentalHouseModel.findByIdAndDelete(id);
 
   return deletedRentalHouse; // Will return null if not found, or the deleted house data
-};
-
-//landlord can retrieve its own listings
-const getLandlordRentalHouses = async (landlordId: string) => {
-  console.log("Inside", landlordId);
-  const result = await RentalHouseModel.find({ landlordId }).populate(
-    "landlordId"
-  );
-  return result;
 };
 
 // Respond to a rental request (approve/reject)

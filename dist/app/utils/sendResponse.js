@@ -8,6 +8,7 @@ const sendResponse = (res, data) => {
         message: data.message,
         token: data.token,
         data: data.data,
+        meta: data.meta,
     });
 };
 exports.default = sendResponse;

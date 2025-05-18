@@ -23,16 +23,11 @@ adminRouter.get(
 );
 
 adminRouter.get(
-  "/rental-requests",
-  auth(USER_ROLE.admin),
-  adminController.getAllRentalRequests
-);
-
-adminRouter.get(
   "/rental-transactions",
   auth(USER_ROLE.admin),
   adminController.getAllRentalTransactions
 );
+adminRouter.get("/summary", auth(USER_ROLE.admin), adminController.userSummary);
 
 adminRouter.patch(
   "/user/:id",

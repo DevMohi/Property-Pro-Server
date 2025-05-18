@@ -18,31 +18,17 @@ const getAllHousesByAdmin = catchAsync(async (req, res) => {
   });
 });
 const getAllUsersByAdmin = catchAsync(async (req, res) => {
-  const users = await adminService.getAllUsers();
+  const users = await adminService.getAllUsers(req.query);
 
-  if (!users || users.length === 0) {
+  if (!users) {
     throw new Error("No users found");
   }
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
     message: "Users retrieved successfully",
-    data: users,
-  });
-});
-
-//All orders
-const getAllRentalRequests = catchAsync(async (req, res) => {
-  const result = await adminService.getAllRentalRequests();
-  if (!result || result.length === 0) {
-    throw new AppError(404, "No Rental Requests Found");
-  }
-
-  sendResponse(res, {
-    success: true,
-    statusCode: StatusCodes.OK,
-    message: "Rental Requests retrieved successfully",
-    data: result,
+    data: users.result,
+    meta: users.meta,
   });
 });
 
@@ -56,6 +42,19 @@ const getAllRentalTransactions = catchAsync(async (req, res) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: "All Rental Transaction Retrieved Successfully",
+    data: result,
+  });
+});
+
+const userSummary = catchAsync(async (req, res) => {
+  const result = await adminService.userSummary();
+  if (!result) {
+    throw new AppError(404, "No Summary Found");
+  }
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: "User Summary Retrieved Successfully",
     data: result,
   });
 });
@@ -80,7 +79,7 @@ const userDeleteByAdmin = catchAsync(async (req, res) => {
 export const adminController = {
   getAllHousesByAdmin,
   getAllUsersByAdmin,
-  getAllRentalRequests,
+  userSummary,
   getAllRentalTransactions,
   userDeleteByAdmin,
 };

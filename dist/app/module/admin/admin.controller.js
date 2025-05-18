@@ -17,6 +17,7 @@ const http_status_codes_1 = require("http-status-codes");
 const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const admin_service_1 = require("./admin.service");
+const error_1 = __importDefault(require("../../helpers/error"));
 const getAllHousesByAdmin = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const houses = yield admin_service_1.adminService.getAllHouses();
     if (!houses || houses.length === 0) {
@@ -41,9 +42,33 @@ const getAllUsersByAdmin = (0, catchAsync_1.default)((req, res) => __awaiter(voi
         data: users,
     });
 }));
+const getAllRentalTransactions = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield admin_service_1.adminService.getAllRentalTransactions();
+    if (!result || result.length === 0) {
+        throw new error_1.default(404, "No Rental Transaction Found");
+    }
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_codes_1.StatusCodes.OK,
+        message: "All Rental Transaction Retrieved Successfully",
+        data: result,
+    });
+}));
+const userSummary = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield admin_service_1.adminService.userSummary();
+    if (!result) {
+        throw new error_1.default(404, "No Summary Found");
+    }
+    (0, sendResponse_1.default)(res, {
+        success: true,
+        statusCode: http_status_codes_1.StatusCodes.OK,
+        message: "User Summary Retrieved Successfully",
+        data: result,
+    });
+}));
 const userDeleteByAdmin = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = req.params.id;
-    // console.log("userId", userId); 
+    // console.log("userId", userId);
     const result = yield admin_service_1.adminService.deleteUserByAdmin(userId);
     if (!result) {
         throw new Error("User not found");
@@ -51,12 +76,14 @@ const userDeleteByAdmin = (0, catchAsync_1.default)((req, res) => __awaiter(void
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
-        message: "User delete successfully",
+        message: "User deleted successfully",
         data: result,
     });
 }));
 exports.adminController = {
     getAllHousesByAdmin,
     getAllUsersByAdmin,
+    userSummary,
+    getAllRentalTransactions,
     userDeleteByAdmin,
 };

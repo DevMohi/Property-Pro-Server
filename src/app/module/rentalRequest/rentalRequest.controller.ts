@@ -23,24 +23,29 @@ const createRequest = catchAsync(async (req: Request, res: Response) => {
 
 const getMyRequests = catchAsync(async (req: Request, res: Response) => {
   const tenantId = req.user?.id;
-  const result = await RentalRequestService.getRequestsByTenant(tenantId);
+  const result = await RentalRequestService.getRequestsByTenant(
+    tenantId,
+    req.query
+  );
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
     message: "Retrieved your rental requests",
-    data: result,
+    meta: result.meta,
+    data: result.result,
   });
 });
 
-const getAllRequests = catchAsync(async (_req: Request, res: Response) => {
-  const result = await RentalRequestService.getAllRequests();
+const getAllRequests = catchAsync(async (req: Request, res: Response) => {
+  const result = await RentalRequestService.getAllRequests(req.query);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
     message: "Retrieved all rental requests",
-    data: result,
+    data: result.result,
+    meta: result.meta,
   });
 });
 

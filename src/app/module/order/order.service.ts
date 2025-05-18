@@ -7,6 +7,7 @@ import User from "../user/user.model";
 
 import { OrderUtils } from "./order.utils";
 import { RentalTransactionModel } from "./order.model";
+import QueryBuilder from "../../builder/querybuilder";
 
 const createRentalTransactionIntoDB = async (
   rentalRequestId: string,
@@ -153,11 +154,21 @@ const getTenantOrdersFromDB = async (email: string) => {
     .populate("landlordId");
 };
 
-const getAllRentalOrdersFromDB = async () => {
-  return await RentalTransactionModel.find()
+const getAllRentalOrdersFromDB = async (query: Record<string, unknown>) => {
+  const rentalOrdrsQuery = new QueryBuilder(
+    RentalTransactionModel.find(),
+    query
+  ).paginate();
+  const result = await rentalOrdrsQuery.modelQuery
     .populate("tenantId")
     .populate("rentalHouseId")
     .populate("landlordId");
+
+  const meta = await rentalOrdrsQuery.countTotal();
+  return {
+    meta,
+    result,
+  };
 };
 
 const cancelRentalOrderFromDB = async (orderId: string, userId: string) => {

@@ -9,10 +9,7 @@ import { IImageFiles } from "../../middlewares/interface/IImageFile";
 // Create a new rental house listing
 const createRentalHouse = catchAsync(async (req: Request, res: Response) => {
   const landlordId = req?.user?.id;
-  console.log(landlordId);
   const rentalHouseData = { ...req.body, landlordId };
-  console.log(rentalHouseData);
-
   const result = await RentalHouseServices.createRentalHouseInDB(
     rentalHouseData,
     req.files as IImageFiles
@@ -26,15 +23,16 @@ const createRentalHouse = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-// Get all rental house listings
-const getAllRentalHouses = catchAsync(async (_req: Request, res: Response) => {
-  const result = (await RentalHouseServices.getAllRentalHousesFromDB());
+// Get all rental house listings -> pagination done here
+const getAllRentalHouses = catchAsync(async (req: Request, res: Response) => {
+  const result = await RentalHouseServices.getAllRentalHousesFromDB(req.query);
 
   sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
     message: "All rental listings retrieved successfully",
-    data: result,
+    meta: result.meta,
+    data: result.result,
   });
 });
 
@@ -105,14 +103,16 @@ const getLandlordRentalHouses = catchAsync(
     console.log(landlordId);
 
     const result = await RentalHouseServices.getLandlordRentalHouses(
-      landlordId
+      landlordId,
+      req.query
     );
 
     sendResponse(res, {
       statusCode: StatusCodes.OK,
       success: true,
       message: "Your rental house listings retrieved",
-      data: result,
+      data: result.result,
+      meta: result.meta,
     });
   }
 );

@@ -19,6 +19,7 @@ const error_1 = __importDefault(require("../../helpers/error"));
 const http_status_codes_1 = require("http-status-codes");
 const user_model_1 = __importDefault(require("../user/user.model"));
 const rentalRequest_model_1 = require("../rentalRequest/rentalRequest.model");
+const querybuilder_1 = __importDefault(require("../../builder/querybuilder"));
 // Create a new rental house listing
 const createRentalHouseInDB = (rentalHouseData, imageFiles) => __awaiter(void 0, void 0, void 0, function* () {
     const { images } = imageFiles;
@@ -29,10 +30,31 @@ const createRentalHouseInDB = (rentalHouseData, imageFiles) => __awaiter(void 0,
     const result = yield rentalHouse_model_1.RentalHouseModel.create(rentalHouseData);
     return result;
 });
-const getAllRentalHousesFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield rentalHouse_model_1.RentalHouseModel.find().populate("landlordId");
+const getAllRentalHousesFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const rentalHouseQuery = new querybuilder_1.default(rentalHouse_model_1.RentalHouseModel.find(), query).paginate();
+    const result = yield rentalHouseQuery.modelQuery;
+    const meta = yield rentalHouseQuery.countTotal();
+    return {
+        meta,
+        result,
+    };
+});
+const getLandlordRentalHouses = (landlordId) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield rentalHouse_model_1.RentalHouseModel.find({ landlordId }).populate("landlordId");
     return result;
 });
+// const getLandlordRentalHouses = async (
+//   landlordId: string,
+//   query: Record<string, unknown>
+// ) => {
+//   const rentalHouseQuery = new QueryBuilder(
+//     RentalHouseModel.find({ landlordId }),
+//     query
+//   ).paginate();
+//   const result = await rentalHouseQuery.modelQuery.populate("landlordId");
+//   const meta = await rentalHouseQuery.countTotal();
+//   return { result, meta };
+// };
 const getSingleRentalHouseFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
     if (!mongoose_1.default.Types.ObjectId.isValid(id))
         return null;
@@ -55,12 +77,6 @@ const deleteRentalHouseFromDB = (id) => __awaiter(void 0, void 0, void 0, functi
     // Use findByIdAndDelete to delete by ID
     const deletedRentalHouse = yield rentalHouse_model_1.RentalHouseModel.findByIdAndDelete(id);
     return deletedRentalHouse; // Will return null if not found, or the deleted house data
-});
-//landlord can retrieve its own listings
-const getLandlordRentalHouses = (landlordId) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("Inside", landlordId);
-    const result = yield rentalHouse_model_1.RentalHouseModel.find({ landlordId }).populate("landlordId");
-    return result;
 });
 // Respond to a rental request (approve/reject)
 const respondToRentalRequestDB = (requestId, status, userId, phoneNumber) => __awaiter(void 0, void 0, void 0, function* () {

@@ -51,14 +51,15 @@ const getTenantOrders = catchAsync(async (req, res) => {
 });
 
 // GET /order/all-orders (admin)
-const getAllRentalOrders = catchAsync(async (_req, res) => {
-  const result = await RentalServices.getAllRentalOrdersFromDB();
+const getAllRentalOrders = catchAsync(async (req, res) => {
+  const result = await RentalServices.getAllRentalOrdersFromDB(req.query);
 
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: "All rental transactions retrieved successfully",
-    data: result,
+    meta: result.meta,
+    data: result.result,
   });
 });
 

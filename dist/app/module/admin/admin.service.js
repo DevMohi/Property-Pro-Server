@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.adminService = void 0;
+const order_model_1 = require("../order/order.model");
 const rentalHouse_model_1 = require("../rentalHouse/rentalHouse.model");
 const user_model_1 = __importDefault(require("../user/user.model"));
 const getAllHouses = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -23,12 +24,30 @@ const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield user_model_1.default.find();
     return result;
 });
+const getAllRentalTransactions = () => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield order_model_1.RentalTransactionModel.find();
+    return result;
+});
 const deleteUserByAdmin = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield user_model_1.default.findByIdAndDelete(userId);
     return result;
 });
+const userSummary = () => __awaiter(void 0, void 0, void 0, function* () {
+    const houses = yield rentalHouse_model_1.RentalHouseModel.find();
+    const users = yield user_model_1.default.find();
+    const tenant = yield user_model_1.default.find({ role: "tenant" });
+    const landlord = yield user_model_1.default.find({ role: "landlord" });
+    return {
+        houses: houses.length,
+        users: users.length,
+        tenants: tenant.length,
+        landlord: landlord.length,
+    };
+});
 exports.adminService = {
     getAllHouses,
     getAllUsers,
+    userSummary,
+    getAllRentalTransactions,
     deleteUserByAdmin,
 };

@@ -1,20 +1,22 @@
+import { query } from "express";
+import QueryBuilder from "../../builder/querybuilder";
 import { RentalTransactionModel } from "../order/order.model";
 import { RentalHouseModel } from "../rentalHouse/rentalHouse.model";
-import { RentalRequestModel } from "../rentalRequest/rentalRequest.model";
 import User from "../user/user.model";
 
 const getAllHouses = async () => {
   const result = await RentalHouseModel.find();
   return result;
 };
-const getAllUsers = async () => {
-  const result = await User.find();
-  return result;
-};
+const getAllUsers = async (query: Record<string, unknown>) => {
+  const userQuery = new QueryBuilder(User.find(), query).paginate();
 
-const getAllRentalRequests = async () => {
-  const result = await RentalRequestModel.find();
-  return result;
+  const result = await userQuery.modelQuery;
+  const meta = await userQuery.countTotal();
+
+  return{
+    meta, result
+  }
 };
 
 const getAllRentalTransactions = async () => {
@@ -27,10 +29,24 @@ const deleteUserByAdmin = async (userId: string) => {
   return result;
 };
 
+const userSummary = async () => {
+  const houses = await RentalHouseModel.find();
+  const users = await User.find();
+  const tenant = await User.find({ role: "tenant" });
+  const landlord = await User.find({ role: "landlord" });
+
+  return {
+    houses: houses.length,
+    users: users.length,
+    tenants: tenant.length,
+    landlord: landlord.length,
+  };
+};
+
 export const adminService = {
   getAllHouses,
   getAllUsers,
-  getAllRentalRequests,
+  userSummary,
   getAllRentalTransactions,
   deleteUserByAdmin,
 };
