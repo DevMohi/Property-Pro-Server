@@ -89,12 +89,13 @@ const getLandlordRentalHouses = (0, catchAsync_1.default)((req, res) => __awaite
     var _a;
     const landlordId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
     console.log(landlordId);
-    const result = yield rentalHouse_service_1.RentalHouseServices.getLandlordRentalHouses(landlordId);
+    const result = yield rentalHouse_service_1.RentalHouseServices.getLandlordRentalHouses(landlordId, req.query);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_codes_1.StatusCodes.OK,
         success: true,
         message: "Your rental house listings retrieved",
-        data: result,
+        data: result.result,
+        meta: result.meta,
     });
 }));
 // Respond to a rental request (approve/reject)

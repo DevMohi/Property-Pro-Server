@@ -55,13 +55,14 @@ const getTenantOrders = (0, catchAsync_1.default)((req, res) => __awaiter(void 0
     });
 }));
 // GET /order/all-orders (admin)
-const getAllRentalOrders = (0, catchAsync_1.default)((_req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield order_service_1.RentalServices.getAllRentalOrdersFromDB();
+const getAllRentalOrders = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield order_service_1.RentalServices.getAllRentalOrdersFromDB(req.query);
     (0, sendResponse_1.default)(res, {
         statusCode: 200,
         success: true,
         message: "All rental transactions retrieved successfully",
-        data: result,
+        meta: result.meta,
+        data: result.result,
     });
 }));
 // DELETE /order/cancel-order/:id

@@ -17,6 +17,7 @@ const rentalRequest_model_1 = require("./rentalRequest.model");
 const http_status_codes_1 = require("http-status-codes");
 const error_1 = __importDefault(require("../../helpers/error"));
 const rentalHouse_model_1 = require("../rentalHouse/rentalHouse.model");
+const querybuilder_1 = __importDefault(require("../../builder/querybuilder"));
 // Create a new rental request
 const createRentalRequest = (data) => __awaiter(void 0, void 0, void 0, function* () {
     // Lookup the rental house to get the landlord ID
@@ -38,13 +39,26 @@ const createRentalRequest = (data) => __awaiter(void 0, void 0, void 0, function
     return result;
 });
 // Get all requests for a specific tenant
-const getRequestsByTenant = (tenantId) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield rentalRequest_model_1.RentalRequestModel.find({ tenantId }).populate("rentalHouseId");
+const getRequestsByTenant = (tenantId, query) => __awaiter(void 0, void 0, void 0, function* () {
+    const tenantRequestsQuery = new querybuilder_1.default(rentalRequest_model_1.RentalRequestModel.find({ tenantId }), query).paginate();
+    const result = yield tenantRequestsQuery.modelQuery.populate("rentalHouseId");
+    const meta = yield tenantRequestsQuery.countTotal();
+    return {
+        result,
+        meta,
+    };
 });
 // Get all requests (admin only)
-const getAllRequests = () => __awaiter(void 0, void 0, void 0, function* () {
-    return yield rentalRequest_model_1.RentalRequestModel.find().populate("rentalHouseId tenantId landlordId");
+const getAllRequests = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const tenantRequestsQuery = new querybuilder_1.default(rentalRequest_model_1.RentalRequestModel.find(), query).paginate();
+    const result = yield tenantRequestsQuery.modelQuery.populate("rentalHouseId tenantId landlordId");
+    const meta = yield tenantRequestsQuery.countTotal();
+    return {
+        meta,
+        result,
+    };
 });
+//aita pore
 const getAllRequestsForLandlord = (landlordId) => __awaiter(void 0, void 0, void 0, function* () {
     const houses = yield rentalHouse_model_1.RentalHouseModel.find({ landlordId }).select("_id");
     const houseIds = houses.map((house) => house._id);
@@ -59,5 +73,5 @@ exports.RentalRequestService = {
     createRentalRequest,
     getRequestsByTenant,
     getAllRequests,
-    getAllRequestsForLandlord
+    getAllRequestsForLandlord,
 };

@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.adminService = void 0;
+const querybuilder_1 = __importDefault(require("../../builder/querybuilder"));
 const order_model_1 = require("../order/order.model");
 const rentalHouse_model_1 = require("../rentalHouse/rentalHouse.model");
 const user_model_1 = __importDefault(require("../user/user.model"));
@@ -20,9 +21,13 @@ const getAllHouses = () => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield rentalHouse_model_1.RentalHouseModel.find();
     return result;
 });
-const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_model_1.default.find();
-    return result;
+const getAllUsers = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const userQuery = new querybuilder_1.default(user_model_1.default.find(), query).paginate();
+    const result = yield userQuery.modelQuery;
+    const meta = yield userQuery.countTotal();
+    return {
+        meta, result
+    };
 });
 const getAllRentalTransactions = () => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield order_model_1.RentalTransactionModel.find();

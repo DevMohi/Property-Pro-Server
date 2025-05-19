@@ -19,6 +19,7 @@ const rentalHouse_model_1 = require("../rentalHouse/rentalHouse.model");
 const user_model_1 = __importDefault(require("../user/user.model"));
 const order_utils_1 = require("./order.utils");
 const order_model_1 = require("./order.model");
+const querybuilder_1 = __importDefault(require("../../builder/querybuilder"));
 const createRentalTransactionIntoDB = (rentalRequestId, userInfo, client_ip) => __awaiter(void 0, void 0, void 0, function* () {
     const rentalRequest = yield rentalRequest_model_1.RentalRequestModel.findById(rentalRequestId);
     if (!rentalRequest)
@@ -129,11 +130,17 @@ const getTenantOrdersFromDB = (email) => __awaiter(void 0, void 0, void 0, funct
         .populate("rentalHouseId")
         .populate("landlordId");
 });
-const getAllRentalOrdersFromDB = () => __awaiter(void 0, void 0, void 0, function* () {
-    return yield order_model_1.RentalTransactionModel.find()
+const getAllRentalOrdersFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const rentalOrdrsQuery = new querybuilder_1.default(order_model_1.RentalTransactionModel.find(), query).paginate();
+    const result = yield rentalOrdrsQuery.modelQuery
         .populate("tenantId")
         .populate("rentalHouseId")
         .populate("landlordId");
+    const meta = yield rentalOrdrsQuery.countTotal();
+    return {
+        meta,
+        result,
+    };
 });
 const cancelRentalOrderFromDB = (orderId, userId) => __awaiter(void 0, void 0, void 0, function* () {
     const order = yield order_model_1.RentalTransactionModel.findById(orderId);

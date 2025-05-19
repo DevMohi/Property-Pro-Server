@@ -7,7 +7,7 @@ shurjopay.config(
   "sp_sandbox",
   "pyyk97hu&6u6",
   "INV",
-  "http://localhost:3000/success"
+  "https://property-pro-client.vercel.app/success"
 );
 
 const makePaymentAsync = async (

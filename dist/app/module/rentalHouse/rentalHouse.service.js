@@ -39,22 +39,18 @@ const getAllRentalHousesFromDB = (query) => __awaiter(void 0, void 0, void 0, fu
         result,
     };
 });
-const getLandlordRentalHouses = (landlordId) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield rentalHouse_model_1.RentalHouseModel.find({ landlordId }).populate("landlordId");
-    return result;
-});
-// const getLandlordRentalHouses = async (
-//   landlordId: string,
-//   query: Record<string, unknown>
-// ) => {
-//   const rentalHouseQuery = new QueryBuilder(
-//     RentalHouseModel.find({ landlordId }),
-//     query
-//   ).paginate();
-//   const result = await rentalHouseQuery.modelQuery.populate("landlordId");
-//   const meta = await rentalHouseQuery.countTotal();
-//   return { result, meta };
+// const getLandlordRentalHouses = async (landlordId: string) => {
+//   const result = await RentalHouseModel.find({ landlordId }).populate(
+//     "landlordId"
+//   );
+//   return result;
 // };
+const getLandlordRentalHouses = (landlordId, query) => __awaiter(void 0, void 0, void 0, function* () {
+    const rentalHouseQuery = new querybuilder_1.default(rentalHouse_model_1.RentalHouseModel.find({ landlordId }), query).paginate();
+    const result = yield rentalHouseQuery.modelQuery.populate("landlordId");
+    const meta = yield rentalHouseQuery.countTotal();
+    return { result, meta };
+});
 const getSingleRentalHouseFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
     if (!mongoose_1.default.Types.ObjectId.isValid(id))
         return null;

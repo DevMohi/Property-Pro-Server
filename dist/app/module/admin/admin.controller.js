@@ -31,15 +31,16 @@ const getAllHousesByAdmin = (0, catchAsync_1.default)((req, res) => __awaiter(vo
     });
 }));
 const getAllUsersByAdmin = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield admin_service_1.adminService.getAllUsers();
-    if (!users || users.length === 0) {
+    const users = yield admin_service_1.adminService.getAllUsers(req.query);
+    if (!users) {
         throw new Error("No users found");
     }
     (0, sendResponse_1.default)(res, {
         success: true,
         statusCode: http_status_codes_1.StatusCodes.OK,
         message: "Users retrieved successfully",
-        data: users,
+        data: users.result,
+        meta: users.meta,
     });
 }));
 const getAllRentalTransactions = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {

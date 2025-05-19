@@ -32,21 +32,23 @@ const createRequest = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, 
 const getMyRequests = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const tenantId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
-    const result = yield rentalRequest_service_1.RentalRequestService.getRequestsByTenant(tenantId);
+    const result = yield rentalRequest_service_1.RentalRequestService.getRequestsByTenant(tenantId, req.query);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_codes_1.StatusCodes.OK,
         success: true,
         message: "Retrieved your rental requests",
-        data: result,
+        meta: result.meta,
+        data: result.result,
     });
 }));
-const getAllRequests = (0, catchAsync_1.default)((_req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield rentalRequest_service_1.RentalRequestService.getAllRequests();
+const getAllRequests = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield rentalRequest_service_1.RentalRequestService.getAllRequests(req.query);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_codes_1.StatusCodes.OK,
         success: true,
         message: "Retrieved all rental requests",
-        data: result,
+        data: result.result,
+        meta: result.meta,
     });
 }));
 //Individual all requests
